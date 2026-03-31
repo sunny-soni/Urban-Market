@@ -8,7 +8,7 @@ import { loginUser } from "../../redux/features/auth/authSlice";
 import { FaShoppingBag, FaUser, FaLock } from "react-icons/fa";
 
 const schema = yup.object({
-  username: yup.string().required("Username is required"),
+  email: yup.string().required("Email is required"),
   password: yup.string().required("Password is required"),
 });
 
@@ -59,25 +59,25 @@ const Login = () => {
         <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             
-            {/* Username */}
+            {/* Email */}
             <div>
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">
-                Username
+                Email
               </label>
               <div className="relative">
                 <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
-                  {...register("username")}
-                  placeholder="Enter your username"
+                  {...register("email")}
+                  placeholder="Enter your email"
                   className={`w-full pl-11 pr-4 py-3 rounded-xl border transition-all outline-none bg-white dark:bg-slate-800 dark:text-white ${
-                    errors.username 
+                    errors.email 
                       ? "border-red-400 ring-4 ring-red-50 dark:ring-red-900/20" 
                       : "border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/20 focus:border-indigo-500"
                   }`}
                 />
               </div>
-              {errors.username && (
-                <p className="text-red-500 text-xs mt-2 ml-1 font-medium">{errors.username.message}</p>
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-2 ml-1 font-medium">{errors.email.message}</p>
               )}
             </div>
 
