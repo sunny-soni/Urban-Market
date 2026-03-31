@@ -4,13 +4,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  CardElement,
-  Elements,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
 import {
   FaTimes,
   FaMapMarkerAlt,
@@ -23,10 +16,6 @@ import {
 import { createOrder } from "../../redux/features/orders/orderSlice";
 import api from "../../api/axios";
 import confetti from "canvas-confetti";
-
-const stripePromise = loadStripe(
-  "pk_test_51TAtWdBcbGUGtnnD7gvozRZN9qjlegSHm7fEWLAQktCP9QH1R5ifNG4VAsGD396RlT5pqQCpHGLKthpucFnsCCC200fqm4bCzu",
-);
 
 const schema = yup.object({
   full_name: yup
@@ -45,74 +34,6 @@ const schema = yup.object({
     .oneOf(["COD", "Card"], "Select a method")
     .required(),
 });
-
-/* --- Stripe Form Sub-Component --- */
-const StripePaymentForm = ({ totalAmount, onPaymentSuccess }) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-
-  const handleStripePayment = async (e) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-    setIsProcessing(true);
-    setErrorMessage(null);
-
-    try {
-      const { data } = await api.post("/api/payments/create-payment-intent", {
-        amount: totalAmount,
-      });
-
-      const result = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: { card: elements.getElement(CardElement) },
-      });
-
-      if (result.error) {
-        setErrorMessage(result.error.message);
-        setIsProcessing(false);
-      } else if (result.paymentIntent.status === "succeeded") {
-        onPaymentSuccess(result.paymentIntent.id);
-      }
-    } catch (err) {
-      setErrorMessage("Payment server unreachable.");
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleStripePayment} className="space-y-6">
-      <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: "14px",
-                color: "#1e293b",
-                "::placeholder": { color: "#94a3b8" },
-              },
-            },
-          }}
-        />
-      </div>
-      {errorMessage && (
-        <p className="text-red-500 text-[10px] font-black uppercase text-center">
-          {errorMessage}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={!stripe || isProcessing}
-        className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-indigo-100 transition-all active:scale-95 disabled:opacity-50"
-      >
-        {isProcessing ? "Processing..." : `Confirm ₹${totalAmount}`}
-      </button>
-      <p className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-        <FaLock size={10} /> Secure SSL Encrypted
-      </p>
-    </form>
-  );
-};
 
 /* --- Main Checkout Component --- */
 const Checkout = ({ isOpen, setIsOpen, totalAmount }) => {
@@ -147,10 +68,10 @@ const Checkout = ({ isOpen, setIsOpen, totalAmount }) => {
     };
 
     const response = await dispatch(createOrder(finalData));
-    
+
     if (response.payload) {
       setPlacedOrderId(response.payload.id);
-      
+
       // Fire Confetti with high z-index
       confetti({
         particleCount: 150,
@@ -270,12 +191,14 @@ const Checkout = ({ isOpen, setIsOpen, totalAmount }) => {
                         {...register("mode_of_payment")}
                         className="sr-only"
                       />
-                      {m === "COD" ? "Cash" : "Stripe"}
+                      {m === "COD" ? "Cash" : "Razorpay"}
                     </label>
                   ))}
                 </div>
                 {errors.mode_of_payment && (
-                    <p className="text-red-500 text-[10px] text-center font-bold uppercase">{errors.mode_of_payment.message}</p>
+                  <p className="text-red-500 text-[10px] text-center font-bold uppercase">
+                    {errors.mode_of_payment.message}
+                  </p>
                 )}
                 <button
                   type="submit"
@@ -286,20 +209,56 @@ const Checkout = ({ isOpen, setIsOpen, totalAmount }) => {
               </form>
             )}
 
-            {/* Step 2: Stripe Payment */}
+            {/* Step 2: Razorpay Payment */}
             {step === 2 && (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="mb-6">
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">Card Details</p>
-                   <Elements stripe={stripePromise}>
-                    <StripePaymentForm
-                      totalAmount={totalAmount}
-                      onPaymentSuccess={(pid) =>
-                        finalizeOrder(getValues(), pid)
-                      }
-                    />
-                  </Elements>
-                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      const { data } = await api.post(
+                        "/api/payments/create-order",
+                        {
+                          amount: totalAmount,
+                        },
+                      );
+
+                      const options = {
+                        key: import.meta.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                        amount: data.amount,
+                        currency: data.currency,
+                        order_id: data.orderId,
+
+                        handler: async function (response) {
+                          await api.post(
+                            "/api/payments/verify-payment",
+                            response,
+                          );
+                          finalizeOrder(
+                            getValues(),
+                            response.razorpay_payment_id,
+                          );
+                        },
+
+                        prefill: {
+                          name: getValues("full_name"),
+                          contact: getValues("mobile"),
+                        },
+
+                        theme: {
+                          color: "#4f46e5",
+                        },
+                      };
+
+                      const rzp = new window.Razorpay(options);
+                      rzp.open();
+                    } catch (err) {
+                      console.error("Payment error:", err);
+                    }
+                  }}
+                  className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl"
+                >
+                  Pay ₹{totalAmount}
+                </button>
               </div>
             )}
           </>
