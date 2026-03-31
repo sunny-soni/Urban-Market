@@ -53,6 +53,12 @@ const apiRoutes = {
   removeWishlistedProduct(id) {
     return `/wishlist/${id}`;
   },
+  chat(){
+    return `/api/chat`
+  },
+  recommendations(){
+    return `/api/recommendations`
+  }
 };
 
 export default apiRoutes;

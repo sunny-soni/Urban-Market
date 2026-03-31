@@ -1,35 +1,37 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "../../../redux/features/products/productSlice";
-import ProductCard from "../../../components/products/productCard";
+import { fetchRecommendedProducts } from "../../redux/features/recommendation/recommendationSlice";
+import ProductCard from "../../components/products/productCard";
 import { FaSearch } from "react-icons/fa";
-import Pagination from "../../../components/pagination/pagination";
+import Pagination from "../../components/pagination/pagination";
 import {
   setOffset,
   setSearchTerm,
-} from "../../../redux/features/products/productSlice";
+} from "../../redux/features/recommendation/recommendationSlice";
 
 function Products() {
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
   const [limit, setLimit] = useState(10);
-  const { products, totalRows, searchTerm, offset } = useSelector((state) => {
-    return state.products;
-  });
+  const { recommendations, totalRows, searchTerm, offset } = useSelector(
+    (state) => {
+      return state.recommendations;
+    },
+  );
+  console.log("🚀 ~ Products ~ recommendations:", recommendations)
   const { userId } = useSelector((state) => state.auth);
 
   const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (isFirstRender.current) {
-      dispatch(fetchProducts({ searchTerm, offset }));
+      dispatch(fetchRecommendedProducts({ searchTerm, offset }));
       isFirstRender.current = false;
       return;
     }
-    console.log("sdgjsagdasjdhgashjdgh");
     const delayDebounceFn = setTimeout(() => {
-      dispatch(fetchProducts({ searchTerm, offset }));
+      dispatch(fetchRecommendedProducts({ searchTerm, offset }));
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
@@ -56,8 +58,8 @@ function Products() {
       </div>
 
       <div className="grid grid-cols-3 gap-4 px-2 py-2">
-        {products?.length &&
-          products?.map((item, index) => {
+        {recommendations?.length &&
+          recommendations?.map((item, index) => {
             return (
               <ProductCard
                 key={item.id}

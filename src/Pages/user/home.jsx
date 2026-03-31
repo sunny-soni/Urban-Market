@@ -5,6 +5,7 @@ import {
   FaHeart,
   FaUser,
   FaCompass,
+  FaMagic,
 } from "react-icons/fa";
 import Products from "./products/products";
 import Orders from "./orders";
@@ -12,6 +13,8 @@ import ProductDetails from "./products/productDetails";
 import Navbar from "../../components/navbar/navbar";
 import Cart from "./cart";
 import Wishlist from "./wishlist";
+import ChatWidget from "../../components/chat/chatWidget";
+import Recommendations from "./recommendations";
 
 export default function HomePage() {
   // Updated Styles to include Dark Mode support
@@ -59,6 +62,11 @@ export default function HomePage() {
             <FaHeart className="text-lg" />
             <span className="font-semibold">Wishlist</span>
           </NavLink>
+
+          <NavLink to="/app/recommendations" className={navLinkStyles}>
+            <FaMagic className="text-lg" />
+            <span className="font-semibold">Recommendations</span>
+          </NavLink>
         </nav>
 
         {/* Account Quick Link - Added dark mode colors */}
@@ -92,6 +100,7 @@ export default function HomePage() {
               <Route path="products/:id" element={<ProductDetails />} />
               <Route path="orders" element={<Orders />} />
               <Route path="wishlist" element={<Wishlist />} />
+              <Route path="recommendations" element={<Recommendations />} />
               <Route
                 path="*"
                 element={
@@ -117,6 +126,10 @@ export default function HomePage() {
               />
             </Routes>
           </div>
+        </div>
+
+        <div>
+          <ChatWidget />
         </div>
       </main>
     </div>
