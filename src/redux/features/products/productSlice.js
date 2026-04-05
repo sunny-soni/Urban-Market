@@ -1,7 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../../api/axios";
 import apiRoutes from "../../../api/routes";
-import { wishlistProduct, removeWishlistedProduct } from "../wishlist/wishlistSlice";
+import {
+  wishlistProduct,
+  removeWishlistedProduct,
+} from "../wishlist/wishlistSlice";
 
 export const fetchProducts = createAsyncThunk("fetchProducts", async (args) => {
   try {
@@ -28,9 +31,10 @@ export const addProduct = createAsyncThunk(
 export const editProduct = createAsyncThunk(
   "editProduct",
   async (data, thunkApi) => {
+    const { productId, formData } = data;
     try {
-      await api.post(apiRoutes.editProduct(), data);
-      thunkApi.dispatch(fetchProducts());
+      await api.put(apiRoutes.editProduct(productId), formData);
+      thunkApi.dispatch(fetchProducts({ searchTerm: "", offset: 0 }));
     } catch (error) {
       console.log("🚀 ~ error:", error);
     }

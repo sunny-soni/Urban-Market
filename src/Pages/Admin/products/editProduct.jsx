@@ -2,16 +2,28 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { addProduct } from "../../../redux/features/products/productSlice";
+import { editProduct } from "../../../redux/features/products/productSlice";
 import { fetchProductById } from "../../../redux/features/products/productIdSlice";
 import { useEffect } from "react";
-import { FaTimes, FaBox, FaInfoCircle, FaTag, FaWarehouse } from "react-icons/fa";
+import {
+  FaTimes,
+  FaBox,
+  FaInfoCircle,
+  FaTag,
+  FaWarehouse,
+} from "react-icons/fa";
 
 const schema = yup.object({
   name: yup.string().required("Product name is required"),
-  price: yup.number().typeError("Price must be a number").required("Price is required"),
+  price: yup
+    .number()
+    .typeError("Price must be a number")
+    .required("Price is required"),
   description: yup.string().required("Description is required"),
-  stock: yup.number().typeError("Stock must be a number").required("Stock is required"),
+  stock: yup
+    .number()
+    .typeError("Stock must be a number")
+    .required("Stock is required"),
 });
 
 const EditProduct = ({ isOpen, setIsOpen, productId }) => {
@@ -45,8 +57,7 @@ const EditProduct = ({ isOpen, setIsOpen, productId }) => {
   }, [product, reset]);
 
   const onSubmit = (data) => {
-    // Note: Usually this would be an 'updateProduct' action for editing
-    dispatch(addProduct(data));
+    dispatch(editProduct({ productId, formData : data }));
     setIsOpen(false);
   };
 
@@ -54,15 +65,19 @@ const EditProduct = ({ isOpen, setIsOpen, productId }) => {
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-all">
-      <div 
+      <div
         className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 border border-slate-100 dark:border-slate-800 transition-all overflow-y-auto max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Edit Product</h2>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Update inventory details</p>
+            <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">
+              Edit Product
+            </h2>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+              Update inventory details
+            </p>
           </div>
           <button
             onClick={() => setIsOpen(false)}
@@ -73,7 +88,9 @@ const EditProduct = ({ isOpen, setIsOpen, productId }) => {
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-slate-400 font-bold animate-pulse uppercase tracking-widest">Loading Data...</div>
+          <div className="py-20 text-center text-slate-400 font-bold animate-pulse uppercase tracking-widest">
+            Loading Data...
+          </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Name */}
@@ -84,10 +101,16 @@ const EditProduct = ({ isOpen, setIsOpen, productId }) => {
               <input
                 {...register("name")}
                 className={`w-full px-4 py-3 rounded-xl border transition-all outline-none bg-slate-50 dark:bg-slate-800 dark:text-white ${
-                  errors.name ? 'border-red-400 ring-4 ring-red-50 dark:ring-red-900/20' : 'border-slate-100 dark:border-slate-700 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/20 focus:border-blue-500'
+                  errors.name
+                    ? "border-red-400 ring-4 ring-red-50 dark:ring-red-900/20"
+                    : "border-slate-100 dark:border-slate-700 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/20 focus:border-blue-500"
                 }`}
               />
-              {errors.name && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase">{errors.name.message}</p>}
+              {errors.name && (
+                <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
             {/* Description */}
@@ -99,10 +122,16 @@ const EditProduct = ({ isOpen, setIsOpen, productId }) => {
                 {...register("description")}
                 rows="3"
                 className={`w-full px-4 py-3 rounded-xl border transition-all outline-none bg-slate-50 dark:bg-slate-800 dark:text-white resize-none ${
-                  errors.description ? 'border-red-400 ring-4 ring-red-50 dark:ring-red-900/20' : 'border-slate-100 dark:border-slate-700 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/20 focus:border-blue-500'
+                  errors.description
+                    ? "border-red-400 ring-4 ring-red-50 dark:ring-red-900/20"
+                    : "border-slate-100 dark:border-slate-700 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/20 focus:border-blue-500"
                 }`}
               />
-              {errors.description && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase">{errors.description.message}</p>}
+              {errors.description && (
+                <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -115,10 +144,16 @@ const EditProduct = ({ isOpen, setIsOpen, productId }) => {
                   type="number"
                   {...register("price")}
                   className={`w-full px-4 py-3 rounded-xl border transition-all outline-none bg-slate-50 dark:bg-slate-800 dark:text-white ${
-                    errors.price ? 'border-red-400 ring-4 ring-red-50 dark:ring-red-900/20' : 'border-slate-100 dark:border-slate-700 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/20 focus:border-blue-500'
+                    errors.price
+                      ? "border-red-400 ring-4 ring-red-50 dark:ring-red-900/20"
+                      : "border-slate-100 dark:border-slate-700 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/20 focus:border-blue-500"
                   }`}
                 />
-                {errors.price && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase">{errors.price.message}</p>}
+                {errors.price && (
+                  <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase">
+                    {errors.price.message}
+                  </p>
+                )}
               </div>
 
               {/* Stock */}
@@ -130,10 +165,16 @@ const EditProduct = ({ isOpen, setIsOpen, productId }) => {
                   type="number"
                   {...register("stock")}
                   className={`w-full px-4 py-3 rounded-xl border transition-all outline-none bg-slate-50 dark:bg-slate-800 dark:text-white ${
-                    errors.stock ? 'border-red-400 ring-4 ring-red-50 dark:ring-red-900/20' : 'border-slate-100 dark:border-slate-700 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/20 focus:border-blue-500'
+                    errors.stock
+                      ? "border-red-400 ring-4 ring-red-50 dark:ring-red-900/20"
+                      : "border-slate-100 dark:border-slate-700 focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-900/20 focus:border-blue-500"
                   }`}
                 />
-                {errors.stock && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase">{errors.stock.message}</p>}
+                {errors.stock && (
+                  <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase">
+                    {errors.stock.message}
+                  </p>
+                )}
               </div>
             </div>
 
