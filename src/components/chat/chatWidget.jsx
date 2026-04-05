@@ -23,6 +23,8 @@ export default function ChatWidget() {
     setHasNotif(false);
   };
 
+  const url = import.meta.env.VITE_API_URL;
+
   const send = async () => {
     if (!input.trim() || loading) return;
 
@@ -34,7 +36,7 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/chat", {
+      const res = await fetch(`${url}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history }),
